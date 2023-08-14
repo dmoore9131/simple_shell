@@ -7,7 +7,7 @@
 #define MAX_INPUT_LENGTH 1024
 #define MAX_ARGS 32
 
-void execute_command(const char *command) {
+void execute_command(char *command) {
     char command_copy[MAX_INPUT_LENGTH];
     strcpy(command_copy, command);
 
