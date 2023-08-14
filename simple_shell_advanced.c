@@ -19,7 +19,7 @@ ssize_t custom_read(int fd, void *buf, size_t count) {
             perror("read");
             return -1;
         } else if (buffer_size == 0) {
-            return 0; // End of file
+            return 0; 
         }
     }
 
@@ -53,7 +53,7 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream) {
             return -1;
         } else if (ret == 0) {
             if (i == 0) {
-                return -1; // End of file and no characters read
+                return -1; 
             } else {
                 break;
             }
@@ -83,8 +83,8 @@ ssize_t custom_getline(char **lineptr, size_t *n, FILE *stream) {
 void execute_command(char *command) {
     pid_t pid = fork();
 
-    if (pid == 0) { // Child process
-        char *argv[64]; // Max number of arguments
+    if (pid == 0) { 
+        char *argv[64]; 
         int argc = 0;
 
         char *token = strtok(command, " ");
@@ -105,10 +105,10 @@ void execute_command(char *command) {
         execvp(argv[0], argv);
         perror("execvp");
         exit(1);
-    } else if (pid > 0) { // Parent process
+    } else if (pid > 0) { 
         int status;
         waitpid(pid, &status, 0);
-    } else { // Fork error
+    } else { 
         perror("fork");
     }
 }
@@ -122,17 +122,17 @@ int main() {
         ssize_t read = custom_getline(&line, &len, stdin);
 
         if (read == -1) {
-            break; // End of file or error
+            break; 
         }
 
-        // Trim newline character
+        
         if (line[read - 1] == '\n') {
             line[read - 1] = '\0';
             read--;
         }
 
         if (strcmp(line, "exit") == 0) {
-            break; // Exit the shell
+            break; 
         }
 
         execute_command(line);
