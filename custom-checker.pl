@@ -1,11 +1,12 @@
-#!/usr/bin/perl -w
+#include <stdio.h>
+#include <stdlib.h>
 
-# Betty Style Checker v1.0
-# By Julien Barbier
+/* Function prototypes */
 
-# ...
-
-# Your Betty checker script should be placed here.
-# This script checks the coding style of your code files.
-# Make sure to follow the coding style guidelines provided in the project description.
+int main(int argc, char **argv)
+{
+    
+    
+    return (EXIT_SUCCESS);
+}
 
