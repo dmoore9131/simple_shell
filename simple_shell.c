@@ -1,9 +1,18 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <fcntl.h>
 
-int main(void)
-{
-    printf("Hello, world!\n");
+#define MAX_INPUT_LENGTH 1024
 
-    return (0);
+
+int main() {
+    
+
+    return 0;
 }
 
