@@ -1,51 +1,70 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <string.h>
 
-#define MAX_INPUT_LENGTH 1024
+#define BUFFER_SIZE 1024
 
-void display_prompt() {
-    printf("#cisfun$ ");
-    fflush(stdout);
+/* Function to tokenize a string */
+void tokenize(char *input, char **tokens) {
+    char *token = strtok(input, " \t\n");
+    int tokenIndex = 0;
+
+    while (token != NULL) {
+        tokens[tokenIndex++] = token;
+        token = strtok(NULL, " \t\n");
+    }
+
+    tokens[tokenIndex] = NULL; /* Set the last token to NULL */
 }
 
 int main(void) {
-    char input[MAX_INPUT_LENGTH];
-    char *argv[2];
-    int status;
+    char input[BUFFER_SIZE];
+    char *tokens[BUFFER_SIZE];
+    pid_t pid;
 
     while (1) {
-        display_prompt();
+        printf("($) ");
+        fflush(stdout);
 
         if (fgets(input, sizeof(input), stdin) == NULL) {
-            printf("\n");
-            break; // Handle end of file (Ctrl+D)
+            break; /* Exit loop on EOF */
         }
 
-        // Remove newline character from input
-        input[strcspn(input, "\n")] = '\0';
+        input[strcspn(input, "\n")] = '\0'; /* Remove newline character */
 
-        // Fork a child process
-        pid_t child_pid = fork();
+        /* Tokenize input */
+        tokenize(input, tokens);
 
-        if (child_pid == -1) {
-            perror("fork");
-            continue;
-        } else if (child_pid == 0) { // Child process
-            argv[0] = input;
-            argv[1] = NULL;
+        if (tokens[0] == NULL) {
+            continue; /* Empty command, skip */
+        }
 
-            // Execute the command
-            if (execve(input, argv, NULL) == -1) {
-                perror(input); // Print an error message
-                exit(EXIT_FAILURE);
+        /* Handle built-in commands */
+        if (strcmp(tokens[0], "exit") == 0) {
+            exit(EXIT_SUCCESS);
+        } else if (strcmp(tokens[0], "cd") == 0) {
+            if (tokens[1] == NULL) {
+                fprintf(stderr, "cd: missing argument\n");
+            } else if (chdir(tokens[1]) != 0) {
+                perror("cd");
             }
-        } else { // Parent process
-            // Wait for the child process to complete
-            waitpid(child_pid, &status, 0);
+            continue;
+        }
+
+        pid = fork();
+        if (pid == 0) {
+            /* Child process */
+            execvp(tokens[0], tokens);
+            perror("execvp");
+            exit(EXIT_FAILURE);
+        } else if (pid > 0) {
+            /* Parent process */
+            wait(NULL);
+        } else {
+            perror("fork");
         }
     }
 
