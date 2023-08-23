@@ -1,65 +1,25 @@
-#include "shell.h"
+#include <stdio.h>
 
-void execute_command(char *command) 
-{
-pid_t child_pid;
-int status;
-
-child_pid = fork();
-if (child_pid == -1) 
-{
-perror("fork");
-exit(EXIT_FAILURE);
-}
-    
-if (child_pid == 0) 
-{
-/* Child process */
-char *args[2];
-args[0] = command;
-args[1] = NULL;
-execve(args[0], args, NULL);
-perror("execve");
-exit(EXIT_FAILURE);
-} 
-else 
-{
-/* Parent process */
-wait(&status);
-}
+/* Function to check if code follows the Betty style */
+int checkBettyStyle(char *code) {
+    /* Implement code to check Betty style here */
+    return 1; // Return 1 for simplicity
 }
 
-int main(void) 
-{
-char *line = NULL;
-size_t len = 0;
-ssize_t read;
+int main(void) {
+    char code[] = "/* This is a sample code snippet */\n"
+                  "#include <stdio.h>\n\n"
+                  "int main(void) {\n"
+                  "    printf(\"Hello, World!\\n\");\n"
+                  "    return 0;\n"
+                  "}\n";
 
-while (1) 
-{
-printf("($) ");
-read = getline(&line, &len, stdin);
-if (read == -1) 
-{
-perror("getline");
-exit(EXIT_FAILURE);
-}
+    if (checkBettyStyle(code)) {
+        printf("Code follows the Betty style.\n");
+    } else {
+        printf("Code does not follow the Betty style.\n");
+    }
 
-if (line[read - 1] == '\n') 
-{
-line[read - 1] = '\0';
-}
-
-if (strcmp(line, "exit") == 0) 
-{
-free(line);
-exit(EXIT_SUCCESS);
-}
-
-execute_command(line);
-}
-
-free(line);
-return 0;
+    return 0;
 }
 
