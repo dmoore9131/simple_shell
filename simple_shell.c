@@ -9,28 +9,24 @@
  */
 int main(void)
 {
-    char *input_buffer = NULL;
-    size_t buffer_size = 0;
-    ssize_t characters_read;
+char *input_buffer = NULL;
+size_t buffer_size = 0;
+ssize_t characters_read;
 
-    while (1)
-    {
-        printf("($) ");  /* Print shell prompt */
-        characters_read = getline(&input_buffer, &buffer_size, stdin);
+while (1)
+{
+printf("($) ");  /* Print shell prompt */
+characters_read = getline(&input_buffer, &buffer_size, stdin);
 
-        if (characters_read == -1)
-        {
-            perror("Error reading input");
-            free(input_buffer);
-            exit(EXIT_FAILURE);
-        }
+if (characters_read == -1)
+{
+perror("Error reading input");
+free(input_buffer);
+exit(EXIT_FAILURE);
+}
+free(input_buffer);
+}
 
-        /* Process the input here (not shown in this example) */
-
-        /* Free allocated memory */
-        free(input_buffer);
-    }
-
-    return (0);
+return (0);
 }
 
