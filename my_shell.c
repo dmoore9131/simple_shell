@@ -1,55 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
-#define MAX_COMMAND_LENGTH 100
-#define PROMPT "#cisfun$ "
+#define BUFFER_SIZE 1024
 
 int main() {
-    char command[MAX_COMMAND_LENGTH];
-    
+    char buffer[BUFFER_SIZE];
+    char *args[] = {"/bin/ls", NULL};  // Command and arguments for the ls command
+
     while (1) {
-        printf(PROMPT);
-        if (fgets(command, sizeof(command), stdin) == NULL) {
-            perror("fgets");
-            exit(EXIT_FAILURE);
-        }
+        printf("#cisfun$ ");
+        fgets(buffer, BUFFER_SIZE, stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';  // Remove newline character
 
-        // Remove the newline character from the command
-        command[strcspn(command, "\n")] = '\0';
-
-        // Handle exit command
-        if (strcmp(command, "exit") == 0) {
+        if (strcmp(buffer, "exit") == 0) {
             printf("Goodbye!\n");
             break;
         }
 
-        // Create a child process
         pid_t pid = fork();
 
         if (pid < 0) {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        } else if (pid == 0) {
-            // Child process
-            int ret = execlp(command, command, NULL);
-
-            if (ret == -1) {
-                perror("execvp");
-                exit(1);
-            }
-        } else {
-            // Parent process
-            int status;
-            waitpid(pid, &status, 0);
-            if (WIFEXITED(status)) {
-                if (WEXITSTATUS(status) != 0) {
-                    printf("Child process exited with status %d\n", WEXITSTATUS(status));
-                }
-            }
+            perror("Fork error");
+            exit(1);
+        } else if (pid == 0) {  // Child process
+            execvp(args[0], args);  // Execute the ls command
+            perror("execvp");
+            exit(1);
+        } else {  // Parent process
+            wait(NULL);  // Wait for the child process to finish
         }
     }
 
