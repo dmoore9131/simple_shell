@@ -9,8 +9,7 @@
 
 #define MAX_INPUT_LENGTH 1024
 
-
-int main() {
+int main(void) {
     
 
     return 0;
