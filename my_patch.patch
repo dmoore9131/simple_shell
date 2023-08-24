@@ -1,6 +1,0 @@
---- my_patch.patch
-+++ my_patch.patch
-@@ -1,2 +1,2 @@
--Hello, this is the original text.
-+Hello, this is the modified text.
-
