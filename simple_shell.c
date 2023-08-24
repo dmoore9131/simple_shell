@@ -1,32 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <sys/wait.h> // Add this line
 
-/**
- * main - Entry point of the shell program
- *
- * Return: 0 on success, -1 on error
- */
-int main(void)
-{
-char *input_buffer = NULL;
-size_t buffer_size = 0;
-ssize_t characters_read;
+#define BUFFER_SIZE 1024
 
-while (1)
-{
-printf("($) ");  /* Print shell prompt */
-characters_read = getline(&input_buffer, &buffer_size, stdin);
-
-if (characters_read == -1)
-{
-perror("Error reading input");
-free(input_buffer);
-exit(EXIT_FAILURE);
-}
-free(input_buffer);
+void display_prompt() {
+    printf("#cisfun$ ");
 }
 
-return (0);
+void execute_command(const char *command) {
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    } else if (pid == 0) {
+        if (execlp(command, command, (char *)NULL) == -1) {
+            perror("execlp");
+            exit(EXIT_FAILURE);
+        }
+        exit(EXIT_SUCCESS);
+    } else {
+        int status;
+        wait(&status);
+    }
+}
+
+int main(void) {
+    char buffer[BUFFER_SIZE];
+    while (1) {
+        display_prompt();
+        if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) {
+            printf("\n");
+            break;
+        }
+        buffer[strlen(buffer) - 1] = '\0';
+        execute_command(buffer);
+    }
+    return 0;
 }
 
