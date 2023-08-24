@@ -2,40 +2,64 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-int main(void) {
-    char *input;
-    size_t bufsize = 32;
-    input = (char *)malloc(bufsize * sizeof(char));
-    if (input == NULL) {
-        perror("malloc");
-        exit(EXIT_FAILURE);
+#define BUFFER_SIZE 1024
+
+// Function to handle built-in commands
+int handle_builtin(char *command) {
+    if (strcmp(command, "exit") == 0) {
+        exit(EXIT_SUCCESS);  // Gracefully exit the shell
     }
+    return 0;  // Not a built-in command
+}
+
+int main() {
+    char input[BUFFER_SIZE];
 
     while (1) {
         printf("#cisfun$ ");
-        getline(&input, &bufsize, stdin);
-        input[strlen(input) - 1] = '\0';  // Remove the newline character
-
-        // Check for the "end of file" condition
-        if (feof(stdin)) {
+        if (fgets(input, BUFFER_SIZE, stdin) == NULL) {
+            // Handle Ctrl+D (end of file)
             printf("\n");
             break;
         }
 
-        // Tokenize the input to separate command and arguments
-        char *token = strtok(input, " ");
-        if (token == NULL) {
-            continue;  // Empty input, prompt again
-        }
+        // Remove the trailing newline character
+        input[strcspn(input, "\n")] = '\0';
 
-        // Execute the command
-        if (execvp(token, &token) == -1) {
-            perror("Command not found");
+        // Check for built-in commands
+        if (handle_builtin(input) == 0) {
+            // Fork a new process
+            pid_t pid = fork();
+
+            if (pid == -1) {
+                perror("fork");
+                exit(EXIT_FAILURE);
+            }
+
+            if (pid == 0) {
+                // Child process
+                char *args[] = {input, NULL};
+                execvp(input, args);
+
+                // If execvp fails
+                perror(input);
+                exit(EXIT_FAILURE);
+            } else {
+                // Parent process
+                int status;
+                waitpid(pid, &status, 0);
+
+                if (WIFEXITED(status)) {
+                    int exit_status = WEXITSTATUS(status);
+                    printf("Exit status: %d\n", exit_status);
+                }
+            }
         }
     }
 
-    free(input);
     return 0;
 }
 
