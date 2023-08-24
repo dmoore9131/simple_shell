@@ -2,59 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
-#define MAX_INPUT_SIZE 1024
-
-void display_prompt() {
-    printf("#cisfun$ ");
-    fflush(stdout);
-}
-
-int main() {
-    char input[MAX_INPUT_SIZE];
-    char *args[100];  // Assuming a maximum of 100 arguments
-    int status;
+int main(void) {
+    char *input;
+    size_t bufsize = 32;
+    input = (char *)malloc(bufsize * sizeof(char));
+    if (input == NULL) {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
 
     while (1) {
-        display_prompt();
+        printf("#cisfun$ ");
+        getline(&input, &bufsize, stdin);
+        input[strlen(input) - 1] = '\0';  // Remove the newline character
 
-        if (fgets(input, sizeof(input), stdin) == NULL) {
-            // Handle end of file (Ctrl+D)
+        // Check for the "end of file" condition
+        if (feof(stdin)) {
             printf("\n");
             break;
         }
 
-        // Remove the trailing newline character
-        input[strcspn(input, "\n")] = '\0';
-
-        // Tokenize the input into arguments
+        // Tokenize the input to separate command and arguments
         char *token = strtok(input, " ");
-        int arg_count = 0;
-        while (token != NULL) {
-            args[arg_count] = token;
-            token = strtok(NULL, " ");
-            arg_count++;
+        if (token == NULL) {
+            continue;  // Empty input, prompt again
         }
-        args[arg_count] = NULL;  // Null-terminate the argument list
 
-        // Fork a child process to execute the command
-        pid_t child_pid = fork();
-        if (child_pid == -1) {
-            perror("fork");
-        } else if (child_pid == 0) {
-            // This code runs in the child process
-            if (execve(args[0], args, NULL) == -1) {
-                perror("execve");
-                exit(EXIT_FAILURE);
-            }
-        } else {
-            // This code runs in the parent process
-            waitpid(child_pid, &status, 0);
+        // Execute the command
+        if (execvp(token, &token) == -1) {
+            perror("Command not found");
         }
     }
 
+    free(input);
     return 0;
 }
 
