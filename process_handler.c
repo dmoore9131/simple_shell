@@ -13,11 +13,14 @@
 int main(int argc, char *argv[])
 {
     int i;
+    int n;
     pid_t pid = getpid(); // Get the process ID of the current process
     pid_t ppid = getppid(); // Get the parent process ID
 
     printf("Parent Process ID: %d\n", ppid); // Print the parent process ID
     printf("Current Process ID: %d\n", pid); // Print the current process ID
+    printf("Enter an integer: ");
+    scanf("%d", &n); // Corrected the scanf format specifier and added & before n
 
     for (i = 0; i < argc; i++)
     {
