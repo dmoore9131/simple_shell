@@ -40,6 +40,7 @@ int main(void) {
 
             if (pid < 0) {
                 perror("Fork failed");
+                exit(EXIT_FAILURE);
             } else if (pid == 0) {
                 // This code runs in the child process
                 if (execvp(args[0], args) == -1) {
