@@ -31,13 +31,28 @@ int main(void) {
             exit(EXIT_FAILURE);
         } else if (pid == 0) {
             // This code runs in the child process
-            if (execlp(input, input, NULL) == -1) {
+            // Tokenize the input for commands and arguments
+            char *args[BUFFER_SIZE / 2];
+            char *token = strtok(input, " ");
+            int arg_count = 0;
+
+            while (token != NULL) {
+                args[arg_count] = token;
+                arg_count++;
+                token = strtok(NULL, " ");
+            }
+
+            args[arg_count] = NULL; // Null-terminate the argument list
+
+            // Execute the command
+            if (execvp(args[0], args) == -1) {
                 perror("Execution failed");
                 exit(EXIT_FAILURE);
             }
         } else {
             // This code runs in the parent process
-            wait(NULL); // Wait for the child process to finish
+            int status;
+            waitpid(pid, &status, 0); // Wait for the child process to finish
         }
     }
 
