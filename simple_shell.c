@@ -1,89 +1,59 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #define BUFFER_SIZE 1024
 
-int main(void)
-{
-    char *input = NULL;
-    size_t input_size = 0;
+int main(void) {
+    char buffer[BUFFER_SIZE];
+    char *args[BUFFER_SIZE / 2]; // Array to store command and arguments
+    int should_run = 1;
 
-    while (1)
-    {
-        // Display the prompt
-        printf("#cisfun$ ");
+    while (should_run) {
+        printf("$ ");
+        fflush(stdout);
 
-        // Read user input
-        ssize_t bytes_read = getline(&input, &input_size, stdin);
-
-        // Handle end of file (Ctrl+D)
-        if (bytes_read == -1)
-        {
-            if (feof(stdin))
-            {
-                printf("\n"); // Print a newline for a clean exit
-                free(input);
-                exit(EXIT_SUCCESS);
-            }
-            else
-            {
-                perror("getline"); // Handle other errors
-                free(input);
-                exit(EXIT_FAILURE);
-            }
+        // Read a line of input from the user
+        if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) {
+            break;
         }
 
-        // Remove the newline character from the input
-        if (bytes_read > 0 && input[bytes_read - 1] == '\n')
-            input[bytes_read - 1] = '\0';
+        // Remove the trailing newline character
+        buffer[strcspn(buffer, "\n")] = '\0';
 
-        // Execute the command
-        pid_t child_pid = fork();
-
-        if (child_pid == -1)
-        {
-            perror("fork");
-            free(input);
-            exit(EXIT_FAILURE);
+        // Tokenize the input into command and arguments
+        char *token = strtok(buffer, " ");
+        int arg_count = 0;
+        while (token != NULL) {
+            args[arg_count] = token;
+            arg_count++;
+            token = strtok(NULL, " ");
         }
+        args[arg_count] = NULL; // Null-terminate the argument list
 
-        if (child_pid == 0) // Child process
-        {
-            // Execute the command using execvp
-            char *args[] = {input, NULL};
-            if (execvp(input, args) == -1)
-            {
-                perror("execvp");
-                free(input);
-                exit(EXIT_FAILURE);
-            }
-        }
-        else // Parent process
-        {
-            // Wait for the child to complete
-            int status;
-            waitpid(child_pid, &status, 0);
+        if (arg_count > 0) {
+            // Fork a child process
+            pid_t pid = fork();
 
-            if (WIFEXITED(status))
-            {
-                // Child process exited normally
-                int exit_status = WEXITSTATUS(status);
-                printf("Exit status: %d\n", exit_status);
-            }
-            else if (WIFSIGNALED(status))
-            {
-                // Child process was terminated by a signal
-                int term_signal = WTERMSIG(status);
-                printf("Terminated by signal: %d\n", term_signal);
+            if (pid < 0) {
+                perror("Fork failed");
+            } else if (pid == 0) {
+                // This code runs in the child process
+                if (execvp(args[0], args) == -1) {
+                    perror("Execution failed");
+                    exit(EXIT_FAILURE);
+                }
+            } else {
+                // This code runs in the parent process
+                int status;
+                waitpid(pid, &status, 0); // Wait for the child to finish
             }
         }
     }
 
-    free(input);
-    return (0);
+    return 0;
 }
 
