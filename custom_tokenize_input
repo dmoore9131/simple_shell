@@ -1,0 +1,72 @@
+#include "shell.h"
+
+/**
+ * custom_tokenize - Split a string into tokens using a specified delimiter.
+ * @str: The string to be tokenized.
+ * @delim: The delimiter used to split the string.
+ *
+ * Return: An array of pointers to the tokens, or NULL if an error occurs.
+ */
+char **custom_tokenize(char *str, const char *delim)
+{
+    char *token = NULL;
+    char **tokens = NULL;
+    int token_count = 0;
+
+    token = strtok(str, delim);
+    while (token)
+    {
+        tokens = realloc(tokens, sizeof(char *) * (token_count + 1));
+        if (tokens == NULL)
+        {
+            _puts("Memory allocation error\n");
+            exit(EXIT_FAILURE);
+        }
+
+        tokens[token_count] = malloc(_strlen(token) + 1);
+        if (!tokens[token_count])
+        {
+            _puts("Memory allocation error\n");
+            exit(EXIT_FAILURE);
+        }
+
+        _strcpy(tokens[token_count], token);
+        token = strtok(NULL, delim);
+        token_count++;
+    }
+
+    tokens = realloc(tokens, sizeof(char *) * (token_count + 1));
+    if (!tokens)
+    {
+        _puts("Memory allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    tokens[token_count] = NULL;
+    return tokens;
+}
+
+/**
+ * custom_tokenize_input - Tokenize a user input string into individual words.
+ * @input: The user input string to be tokenized.
+ *
+ * Return: An array of pointers to the tokens, or NULL if an error occurs.
+ */
+char **custom_tokenize_input(char *input)
+{
+    char **tokens = NULL;
+    char *input_copy = NULL;
+
+    input_copy = _strdup(input);
+    if (input_copy == NULL)
+    {
+        _puts("Memory allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    tokens = custom_tokenize(input_copy, " \t\r\n\a");
+    free(input_copy);
+
+    return tokens;
+}
+
