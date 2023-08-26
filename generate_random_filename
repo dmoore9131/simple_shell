@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+# Define the tab width to convert indents
+my $TAB_WIDTH = 4;
+
+# Find all files with a ".c" extension
+my @files = `find . -name "*.c"`;
+
+# Iterate through each found file
+foreach my $file (@files) {
+    chomp($file);
+
+    # Remove trailing white spaces from each line
+    `perl -pi -e 's/[[:space:]]*\$//g' $file`;
+
+    # Convert end-of-line sequences to LF (Unix-style line endings)
+    `perl -pi -e 's/\r\n|\r/\n/g' $file`;
+
+    # Convert indents to tabs
+    `perl -pi -e 's{^(( {$TAB_WIDTH})+) }{substr("\t" x length(\$1), 0, $TAB_WIDTH)}e' $file`;
+}
+
+# Random filename generation
+my $random_filename = generate_random_filename();
+
+# Function to generate a random filename
+sub generate_random_filename {
+    my @chars = ('A'..'Z', 'a'..'z', 0..9);
+    my $filename = join('', @chars[rand(62)] for 1..10);
+    return "$filename.txt";
+}
+
+print "Random Filename: $random_filename\n";
+
