@@ -1,11 +1,10 @@
 #include <stdio.h>
 
-int main(int ac, char **av)
-{
-    int i;
+int main(int argc, char **argv) {
+    printf("Number of arguments: %d\n", argc);
 
-    for (i = 1; av[i] != NULL; i++) {
-        printf("%s\n", av[i]);
+    for (int i = 0; i < argc; i++) {
+        printf("Argument %d: %s\n", i, argv[i]);
     }
 
     return 0;

@@ -4,20 +4,19 @@
 int main() {
     char *line = NULL;
     size_t len = 0;
-    ssize_t read;
 
-    printf("Enter a line of text: ");
-    
-    // Use getline to read a line from stdin
-    read = getline(&line, &len, stdin);
+    while (1) {
+        printf("Enter a command: ");
+        ssize_t read = getline(&line, &len, stdin);
 
-    if (read != -1) {
+        if (read == -1) {
+            perror("getline");
+            exit(EXIT_FAILURE);
+        }
+
         printf("You entered: %s", line);
-    } else {
-        printf("Error reading input.");
     }
 
-    // Free allocated memory
     free(line);
     return 0;
 }

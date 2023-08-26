@@ -2,60 +2,59 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
-#define BUFFER_SIZE 1024
+#define MAX_INPUT_LENGTH 100
 
 // Function to handle built-in commands
-int handle_builtin(char *command) {
-    if (strcmp(command, "exit") == 0) {
-        exit(EXIT_SUCCESS);  // Gracefully exit the shell
+void handle_builtin(char *input) {
+    if (strcmp(input, "exit") == 0) {
+        printf("Exiting shell.\n");
+        exit(EXIT_SUCCESS);
+    } else {
+        printf("Unknown command: %s\n", input);
     }
-    return 0;  // Not a built-in command
 }
 
 int main() {
-    char input[BUFFER_SIZE];
+    char input[MAX_INPUT_LENGTH];
 
     while (1) {
-        printf("#cisfun$ ");
-        if (fgets(input, BUFFER_SIZE, stdin) == NULL) {
-            // Handle Ctrl+D (end of file)
-            printf("\n");
-            break;
+        printf("#cisfun$ "); // Display prompt
+
+        if (fgets(input, MAX_INPUT_LENGTH, stdin) == NULL) {
+            perror("fgets");
+            exit(EXIT_FAILURE);
         }
 
-        // Remove the trailing newline character
+        // Remove the trailing newline character if present
         input[strcspn(input, "\n")] = '\0';
 
-        // Check for built-in commands
-        if (handle_builtin(input) == 0) {
-            // Fork a new process
-            pid_t pid = fork();
+        handle_builtin(input); // Check for built-in commands
 
-            if (pid == -1) {
-                perror("fork");
-                exit(EXIT_FAILURE);
-            }
+        pid_t child_pid = fork();
 
-            if (pid == 0) {
-                // Child process
-                char *args[] = {input, NULL};
-                execvp(input, args);
+        if (child_pid == -1) {
+            perror("fork");
+            exit(EXIT_FAILURE);
+        }
 
-                // If execvp fails
-                perror(input);
-                exit(EXIT_FAILURE);
+        if (child_pid == 0) {
+            // This code is executed by the child process
+            // Replace the child process with the desired command
+            execlp(input, input, NULL);
+            // If execlp returns, it means an error occurred
+            perror("execlp");
+            exit(EXIT_FAILURE);
+        } else {
+            // This code is executed by the parent process
+            int status;
+            wait(&status); // Wait for the child process to finish
+
+            if (WIFEXITED(status)) {
+                printf("Child process exited with status %d\n", WEXITSTATUS(status));
             } else {
-                // Parent process
-                int status;
-                waitpid(pid, &status, 0);
-
-                if (WIFEXITED(status)) {
-                    int exit_status = WEXITSTATUS(status);
-                    printf("Exit status: %d\n", exit_status);
-                }
+                printf("Child process did not exit normally\n");
             }
         }
     }
