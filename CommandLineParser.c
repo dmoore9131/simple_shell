@@ -1,13 +1,24 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-int main(int ac, char **av)
-{
-    int i;
+int main() {
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
 
-    for (i = ac - 1; i >= 0; i--) {
-        printf("%d. %s\n", ac - i, av[i]);
+    printf("Enter a line of text: ");
+    
+    // Use getline to read a line from stdin
+    read = getline(&line, &len, stdin);
+
+    if (read != -1) {
+        printf("You entered: %s", line);
+    } else {
+        printf("Error reading input.");
     }
-    printf("%ld", getline());
+
+    // Free allocated memory
+    free(line);
     return 0;
 }
 
