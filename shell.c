@@ -5,9 +5,10 @@
 *
 *Return: return 1
 */
+
 int main(void)
 {
-	char buffer[BUFFER_SIZE];
+	char buffer[BUFFER];
 	size_t len = 0;
 	pid_t child_pid;
 	int status;
@@ -17,7 +18,7 @@ int main(void)
 		printf("cisfun$ ");
 		fflush(stdout);
 
-		if (fgets(buffer, BUFFER_SIZE, stdin) == NULL)
+		if (fgets(buffer, BUFFER, stdin) == NULL)
 		{
 			printf("\n");
 			break;
