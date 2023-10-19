@@ -17,18 +17,20 @@ extern char **environ;
  * @ found: a byte to show wheather file is found or not
  * @ path: path if found otherwise NULL
 */
-typedef struct 
+typedef struct
 {
 	char found;
-	char * path;
+	char *path;
 } file_status;
 
 /*tokenize a string*/
-char ** tokenize(char * buffer, short EOL);
+char **tokenize(char *buffer, short EOL);
 
-char * _getenv(const char *name);
+char *_getenv(const char *name);
 
 file_status *file_exists(char *name);
 
 char *concatenate(int count, ...);
+
+void execute_command(char **tokens);
 #endif

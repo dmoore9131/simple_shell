@@ -1,52 +1,46 @@
 #include "shell.h"
 
 /**
-* main - main function in the task
-*
-*Return: return 1
+ * main - simple shell
+ *
+ * Return: 0 (sucessful)
 */
+
 
 int main(void)
 {
-	char buffer[BUFFER];
-	size_t len = 0;
-	pid_t child_pid;
-	int status;
+	size_t length = BUFFER;
+	ssize_t charector_count;
+	char *buffer = NULL, **tokens = NULL;
 
+	file_status *f_status;
+
+	printf("$ ");
 	while (1)
 	{
-		printf("cisfun$ ");
-		fflush(stdout);
+		charector_count = getline(&buffer, &length, stdin);
 
-		if (fgets(buffer, BUFFER, stdin) == NULL)
+		if (charector_count == -1)
 		{
 			printf("\n");
-			break;
-		}
-		len = strlen(buffer);
-		if (len > 0 && buffer[len - 1] == '\n')
-			buffer[len - 1] = '\0';
-		child_pid = fork();
-		if (child_pid == -1)
-		{
-			perror("Fork failed");
-			exit(1);
+			return (-1);
 		}
 
-		if (child_pid == 0)
-		{
-			char *args[2];
+		tokens = tokenize(buffer, 0);
+		f_status = file_exists(tokens[0]);
 
-			args[0] = buffer;
-			args[1] = NULL;
-			execve(buffer, args, NULL);
-			perror("Command not found");
-			exit(1);
+		if (f_status->found)
+		{
+			printf("%s does not exist\n$ ", buffer);
+			continue;
 		}
-		else
-			wait(&status);
+
+		tokens[0] = f_status->path;
+		free(f_status);
+
+		execute_command(tokens);
 	}
 
-	return (EXIT_SUCCESS);
+	return (0);
 }
 

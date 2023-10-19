@@ -82,3 +82,33 @@ file_status *file_exists(char *name)
 	return (f_stat);
 }
 
+/**
+ * execute_command - using execve it executes a file in your environment
+ *
+ * @tokens: tokens that build up the command i,e ["ls", "-al"]
+ *
+ * Return void
+*/
+
+void execute_command(char **tokens)
+{
+	pid_t execve_pid;
+
+	execve_pid = fork();
+
+	if (execve_pid == -1)
+		perror("execve error");
+
+	if (execve_pid == 0)
+	{
+		int exec_error;
+
+		exec_error = execve(tokens[0], tokens, NULL);
+		if (exec_error == -1)
+			printf("%s does not exist\n", tokens[0]);
+	}
+
+	wait(&execve_pid);
+	printf("$ ");
+}
+

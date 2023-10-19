@@ -29,7 +29,43 @@ char *concatenate(int count, ...)
 	}
 
 	va_end(args);
-
 	return (buffer);
+}
+
+/**
+ * tokenize - using a space tokenizes a string
+ *
+ * @buffer: the string to be tokenized
+ * @EOL: nam angazi
+ *
+ * Return: array of strings (tokens)
+ */
+
+char **tokenize(char *buffer, short EOL)
+{
+
+	char *token = strtok(buffer, " \n");
+
+	int memory = strlen(buffer + BUFFER);
+
+	char **tokens = malloc(memory + 2);
+
+	int i;
+
+	tokens[0] = token;
+
+	i = 1;
+	while (token)
+	{
+		token = strtok(NULL, " \n");
+
+		tokens[i] = token;
+		i++;
+	}
+
+	if (EOL)
+		tokens[i] = NULL;
+
+	return (tokens);
 }
 
