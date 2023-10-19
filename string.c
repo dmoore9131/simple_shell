@@ -1,71 +1,121 @@
 #include "shell.h"
 
 /**
- * concatenate - join together a number of strings
+ *_strcmp - compare two strings
+ *@first: first string to be compared
+ *@second: second string to be compared
  *
- * @count: number of strings to be concatenated
- * @...: strings in a varaidac form
- *
- * Return: string which is concatenated
-*/
+ * Return: difference of the two strings
+ */
 
-char *concatenate(int count, ...)
+int _strcmp(char *first, char *second)
 {
-	va_list args;
-	char *buffer, *str;
-	int i;
+	int i = 0;
 
-	va_start(args, count);
-
-	buffer = malloc(sizeof(char) * 100024);
-
-	if (buffer == NULL)
-		return (NULL);
-
-	for (i = 0; i < count; i++)
+	while (first[i] != '\0')
 	{
-		str = va_arg(args, char *);
-		strcat(buffer, str);
+		if (first[i] != second[i])
+			break;
+		i++;
 	}
-
-	va_end(args);
-	return (buffer);
+	return (first[i] - second[i]);
 }
 
 /**
- * tokenize - using a space tokenizes a string
+ *_strcat - concatenates two strings
+ *@destination: string to be concatenated to
+ *@source:  string to concatenate
  *
- * @buffer: the string to be tokenized
- * @EOL: nam angazi
- *
- * Return: array of strings (tokens)
+ * Return: address of the new string
  */
 
-char **tokenize(char *buffer, short EOL)
+char *_strcat(char *destination, char *source)
 {
+	char *new_string =  NULL;
+	int len_dest = _strlen(destination);
+	int len_source = _strlen(source);
 
-	char *token = strtok(buffer, " \n");
+	new_string = malloc(sizeof(*new_string) * (len_dest + len_source + 1));
+	_strcpy(destination, new_string);
+	_strcpy(source, new_string + len_dest);
+	new_string[len_dest + len_source] = '\0';
+	return (new_string);
+}
 
-	int memory = strlen(buffer + BUFFER);
+/**
+ *_strspn - gets the length of a prefix substring
+ *@str1: string to be searched
+ *@str2: string to be used
+ *
+ *Return: number of bytes in the initial segment of 5 which are part of accept
+ */
 
-	char **tokens = malloc(memory + 2);
+int _strspn(char *str1, char *str2)
+{
+	int i = 0;
+	int match = 0;
 
-	int i;
-
-	tokens[0] = token;
-
-	i = 1;
-	while (token)
+	while (str1[i] != '\0')
 	{
-		token = strtok(NULL, " \n");
-
-		tokens[i] = token;
+		if (_strchr(str2, str1[i]) == NULL)
+			break;
+		match++;
 		i++;
 	}
+	return (match);
+}
 
-	if (EOL)
-		tokens[i] = NULL;
+/**
+ *_strcspn - computes segment of str1 which consists of characters not in str2
+ *@str1: string to be searched
+ *@str2: string to be used
+ *
+ *Return: index at which a char in str1 exists in str2
+ */
 
-	return (tokens);
+
+int _strcspn(char *str1, char *str2)
+{
+	int len = 0, i;
+
+	for (i = 0; str1[i] != '\0'; i++)
+	{
+		if (_strchr(str2, str1[i]) != NULL)
+			break;
+		len++;
+	}
+	return (len);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ *_strchr - locates a char in a string
+ *@s: string to be searched
+ *@c: char to be checked
+ *
+ *Return: pointer to the first occurence of c in s
+ */
+
+char *_strchr(char *s, char c)
+{
+	int i = 0;
+
+	for (; s[i] != c && s[i] != '\0'; i++)
+		;
+	if (s[i] == c)
+		return (s + i);
+	else
+		return (NULL);
 }
 

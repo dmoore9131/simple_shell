@@ -1,46 +1,62 @@
 #include "shell.h"
 
+
 /**
- * main - simple shell
+ * main - the main shell code
+ * @argc: number of arguments passed
+ * @argv: program arguments to be parsed
  *
- * Return: 0 (sucessful)
-*/
+ * applies the functions in utils and helpers
+ * implements EOF
+ * Prints error on Failure
+ * Return: 0 on success
+ */
 
+char **commands = NULL;
+char *line = NULL;
+char *shell_name = NULL;
+int status = 0;
 
-int main(void)
+int main(int argc __attribute__((unused)), char **argv)
 {
-	size_t length = BUFFER;
-	ssize_t charector_count;
-	char *buffer = NULL, **tokens = NULL;
+	char **current_command = NULL;
+	int i, type_command = 0;
+	size_t n = 0;
 
-	file_status *f_status;
-
-	printf("$ ");
+	signal(SIGINT, ctrl_c_handler);
+	shell_name = argv[0];
 	while (1)
 	{
-		charector_count = getline(&buffer, &length, stdin);
-
-		if (charector_count == -1)
+		non_interactive();
+		print(" ($) ", STDOUT_FILENO);
+		if (getline(&line, &n, stdin) == -1)
 		{
-			printf("\n");
-			return (-1);
+			free(line);
+			exit(status);
 		}
+			remove_newline(line);
+			remove_comment(line);
+			commands = tokenizer(line, ";");
 
-		tokens = tokenize(buffer, 0);
-		f_status = file_exists(tokens[0]);
-
-		if (f_status->found)
+		for (i = 0; commands[i] != NULL; i++)
 		{
-			printf("%s does not exist\n$ ", buffer);
-			continue;
+			current_command = tokenizer(commands[i], " ");
+			if (current_command[0] == NULL)
+			{
+				free(current_command);
+				break;
+			}
+			type_command = parse_command(current_command[0]);
+
+			/* initializer -   */
+			initializer(current_command, type_command);
+			free(current_command);
 		}
-
-		tokens[0] = f_status->path;
-		free(f_status);
-
-		execute_command(tokens);
+		free(commands);
 	}
+	free(line);
 
-	return (0);
+	return (status);
 }
 
+	
