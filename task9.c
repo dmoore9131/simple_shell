@@ -11,6 +11,18 @@
 int commandExists(const char *cmd);
 void printEnvironment(void);
 
+void _setenv(const char *variable, const char *value) {
+    if (setenv(variable, value, 1) == -1) {
+        fprintf(stderr, "Failed to set environment variable\n");
+    }
+}
+
+void _unsetenv(const char *variable) {
+    if (unsetenv(variable) == -1) {
+        fprintf(stderr, "Failed to unset environment variable\n");
+    }
+}
+
 int main(void) {
     char *buffer = NULL;
     size_t bufsize = 0;
@@ -57,17 +69,13 @@ int main(void) {
                 printEnvironment();
             } else if (strcmp(args[0], "setenv") == 0) {
                 if (args[1] != NULL && args[2] != NULL) {
-                    if (setenv(args[1], args[2], 1) == -1) {
-                        fprintf(stderr, "Failed to set environment variable\n");
-                    }
+                    _setenv(args[1], args[2]);
                 } else {
                     fprintf(stderr, "Usage: setenv VARIABLE VALUE\n");
                 }
             } else if (strcmp(args[0], "unsetenv") == 0) {
                 if (args[1] != NULL) {
-                    if (unsetenv(args[1]) == -1) {
-                        fprintf(stderr, "Failed to unset environment variable\n");
-                    }
+                    _unsetenv(args[1]);
                 } else {
                     fprintf(stderr, "Usage: unsetenv VARIABLE\n");
                 }
