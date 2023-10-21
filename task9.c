@@ -1,67 +1,56 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-void execute_setenv(char *command) {
-    char *var_name = strtok(NULL, " "); // Parse the environment variable name
-    char *var_value = strtok(NULL, " "); // Parse the environment variable value
-
-    if (var_name == NULL) {
-        fprintf(stderr, "Usage: setenv <variable_name> [variable_value]\n");
-    } else {
-        if (var_value != NULL) {
-            if (setenv(var_name, var_value, 1) != 0) {
-                perror("setenv");
-            }
-        } else {
-            // Handle the case where only the variable name is provided
-            if (setenv(var_name, "", 1) != 0) {
-                perror("setenv");
-            }
-        }
+void execute_setenv(char *var_name, char *var_value) {
+    if (setenv(var_name, var_value, 1) != 0) {
+        perror("setenv");
     }
 }
 
-void execute_unsetenv(char *command) {
-    char *var_name = strtok(NULL, " "); // Parse the environment variable name
-
-    if (var_name == NULL) {
-        fprintf(stderr, "Usage: unsetenv <variable_name>\n");
-    } else {
-        if (unsetenv(var_name) != 0) {
-            perror("unsetenv");
-        }
+void execute_unsetenv(char *var_name) {
+    if (unsetenv(var_name) != 0) {
+        perror("unsetenv");
     }
 }
 
 int main() {
-    char command[100]; // Define a buffer to read user input
+    char input[256]; // Adjust the buffer size as needed
+    char *command, *var_name, *var_value;
+
     while (1) {
-        printf("Enter a command: ");
-        if (fgets(command, sizeof(command), stdin) == NULL) {
-            break; // Exit on EOF (e.g., Ctrl+D)
+        printf("CustomShell> ");
+        if (fgets(input, sizeof(input), stdin) == NULL) {
+            break; // Exit on Ctrl+D or error
         }
 
-        // Remove the trailing newline character from the input
-        size_t len = strlen(command);
-        if (len > 0 && command[len - 1] == '\n') {
-            command[len - 1] = '\0';
-        }
+        // Remove the trailing newline character
+        input[strcspn(input, "\n")] = 0;
 
-        // Check the first word to determine the command
-        char *token = strtok(command, " ");
-        if (token == NULL) {
-            fprintf(stderr, "Invalid command\n");
+        // Tokenize the input
+        command = strtok(input, " ");
+        var_name = strtok(NULL, " ");
+        var_value = strtok(NULL, " ");
+
+        if (command == NULL) {
+            printf("No command entered.\n");
             continue;
-        }
-
-        if (strcmp(token, "setenv") == 0) {
-            execute_setenv(command);
-        } else if (strcmp(token, "unsetenv") == 0) {
-            execute_unsetenv(command);
+        } else if (strcmp(command, "setenv") == 0) {
+            if (var_name == NULL) {
+                printf("setenv: Variable name not provided.\n");
+            } else {
+                execute_setenv(var_name, var_value);
+            }
+        } else if (strcmp(command, "unsetenv") == 0) {
+            if (var_name == NULL) {
+                printf("unsetenv: Variable name not provided.\n");
+            } else {
+                execute_unsetenv(var_name);
+            }
+        } else if (strcmp(command, "exit") == 0) {
+            break; // Exit the shell
         } else {
-            fprintf(stderr, "Invalid command\n");
+            printf("Unknown command: %s\n", command);
         }
     }
 
