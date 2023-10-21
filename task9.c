@@ -1,16 +1,15 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 void execute_setenv(char *command) {
-    char *token = strtok(NULL, " "); // Parse the command
-    if (token == NULL) {
+    char *var_name = strtok(NULL, " "); // Parse the environment variable name
+    char *var_value = strtok(NULL, " "); // Parse the environment variable value
+
+    if (var_name == NULL) {
         fprintf(stderr, "Usage: setenv <variable_name> [variable_value]\n");
     } else {
-        char *var_name = strdup(token);
-        char *var_value = strtok(NULL, " "); // Parse the environment variable value
-
         if (var_value != NULL) {
             if (setenv(var_name, var_value, 1) != 0) {
                 perror("setenv");
@@ -21,50 +20,49 @@ void execute_setenv(char *command) {
                 perror("setenv");
             }
         }
-        free(var_name); // Clean up memory
     }
 }
 
 void execute_unsetenv(char *command) {
-    char *token = strtok(NULL, " "); // Parse the command
-    if (token == NULL) {
+    char *var_name = strtok(NULL, " "); // Parse the environment variable name
+
+    if (var_name == NULL) {
         fprintf(stderr, "Usage: unsetenv <variable_name>\n");
     } else {
-        char *var_name = strdup(token);
-
         if (unsetenv(var_name) != 0) {
             perror("unsetenv");
         }
-        free(var_name); // Clean up memory
     }
 }
 
-int main(void) {
-    char *input;
-    size_t len = 0;
-    ssize_t read;
-
+int main() {
+    char command[100]; // Define a buffer to read user input
     while (1) {
-        printf("#cisfun$ ");
-        read = getline(&input, &len, stdin);
-
-        if (read == -1) {
-            perror("getline");
-            free(input);
-            exit(EXIT_FAILURE);
+        printf("Enter a command: ");
+        if (fgets(command, sizeof(command), stdin) == NULL) {
+            break; // Exit on EOF (e.g., Ctrl+D)
         }
 
-        // Check for built-in commands and execute them
-        if (strncmp(input, "setenv", 6) == 0) {
-            execute_setenv(input);
-        } else if (strncmp(input, "unsetenv", 8) == 0) {
-            execute_unsetenv(input);
+        // Remove the trailing newline character from the input
+        size_t len = strlen(command);
+        if (len > 0 && command[len - 1] == '\n') {
+            command[len - 1] = '\0';
+        }
+
+        // Check the first word to determine the command
+        char *token = strtok(command, " ");
+        if (token == NULL) {
+            fprintf(stderr, "Invalid command\n");
+            continue;
+        }
+
+        if (strcmp(token, "setenv") == 0) {
+            execute_setenv(command);
+        } else if (strcmp(token, "unsetenv") == 0) {
+            execute_unsetenv(command);
         } else {
-            // Handle other commands or external programs here
+            fprintf(stderr, "Invalid command\n");
         }
-
-        free(input);
-        input = NULL;
     }
 
     return 0;
