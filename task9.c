@@ -3,7 +3,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// Function prototypes for your built-in commands
 void execute_setenv(char *command);
 void execute_unsetenv(char *command);
 
@@ -22,7 +21,6 @@ int main(void) {
             exit(EXIT_FAILURE);
         }
 
-        // Check for built-in commands and execute them
         if (strncmp(input, "setenv", 6) == 0) {
             execute_setenv(input);
         } else if (strncmp(input, "unsetenv", 8) == 0) {
@@ -39,7 +37,6 @@ int main(void) {
 }
 
 void execute_setenv(char *command) {
-    // Parse the command and extract the variable name and value
     char *tokens = strtok(command, " ");
     char *name = strtok(NULL, " ");
     char *value = strtok(NULL, " ");
@@ -49,7 +46,6 @@ void execute_setenv(char *command) {
         return;
     }
 
-    // Set the environment variable
     if (value != NULL) {
         if (setenv(name, value, 1) != 0) {
             perror("setenv");
@@ -62,7 +58,6 @@ void execute_setenv(char *command) {
 }
 
 void execute_unsetenv(char *command) {
-    // Parse the command and extract the variable name
     char *tokens = strtok(command, " ");
     char *name = strtok(NULL, " ");
 
@@ -71,7 +66,6 @@ void execute_unsetenv(char *command) {
         return;
     }
 
-    // Unset the environment variable
     if (unsetenv(name) != 0) {
         perror("unsetenv");
     }
